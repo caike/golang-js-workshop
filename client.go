@@ -18,7 +18,6 @@ import (
 // Takes destination server as single argument,
 // otherwise uses localhost:8080 as default
 var addr = flag.String("server", "localhost:3000", "Websocket Server")
-var raspName = flag.String("raspname", "default-client", "Client name")
 
 func main() {
 

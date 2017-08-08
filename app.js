@@ -28,26 +28,14 @@ server.on("upgrade", (request, socket, head) => {
 	}
 });
 
-let rbConnection;
-let webConnection;
-
-// raspberry socket
-// TODO: remove this
+const webClients = new Map();
 let raspberrySocket;
 
-// Set of websocket connections
-// from web clients
-const webClients = new Map();
-web.locals.webClients = webClients;
-
-// Mount Express app
-
 piWs.on("connection", (socket) => {
-
   console.log("connection from websocket");
-
+  // currently supporting a SINGLE connection
+  // from a raspberryPi
   raspberrySocket = socket;
-
   // receives result of running command on the PI
   raspberrySocket.on("message", (raspResponse) => {
     console.log("receipved message from raspberry");
@@ -59,17 +47,17 @@ piWs.on("connection", (socket) => {
   raspberrySocket.on("close", () => console.log("Connection closed"));
 });
 
-webWs.on("connection", (socket) => {
-  let clientName = socket.upgradeReq.url.split("-")[1]
+webWs.on("connection", (browserSocket) => {
+  let clientName = browserSocket.upgradeReq.url.split("-")[1]
   console.log("Connection from web client: ", clientName);
-  webClients.set(clientName, socket);
+  webClients.set(clientName, browserSocket);
 
-  socket.on("message", (commandFromWeb) => {
+  browserSocket.on("message", (commandFromWeb) => {
     raspberrySocket.send(`${clientName}::${commandFromWeb}`);
   });
-  socket.on("close", () => {
+  browserSocket.on("close", () => {
     console.log("closing connection from web");
-    webClients.splice(webClients.indexOf(socket), 1);
+    webClients.splice(webClients.indexOf(browserSocket), 1);
   });
 });
 
