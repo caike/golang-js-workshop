@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Websocket Client</title>
+    <style>
+      #output {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <form>
+        <span>
+          <input type="text" id="command" placeholder="Type command" />
+          <button id="runCommand">Send</button>
+        </span>
+        <p id="output">
+        </p>
+      </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      (function($){
+        // Opens a web socket and [HACK ALERT] uses curren unix timestamp as the "id".
+        // This is a quick-n-dirty solution to authentication or prompting the user
+        // for a login name. Gets the job done for demoing purposes.
+        const ws = new WebSocket(`ws://localhost:3000/web-${+(new Date())}`);
+
+        let commandField = $("#command");
+        let outputField = $("#output");
+
+        $("form").on("submit", (e) =>{
+          e.preventDefault();
+          e.stopPropagation();
+
+          let commandVal = commandField.val();
+          console.log("Sending command: ", commandVal);
+          ws.send(commandVal);
+        });
+
+				ws.onopen = function()
+				{
+					console.log("connected to websocket");
+				};
+
+				ws.onmessage = function (evt)
+				{
+          console.log("response received");
+          outputField.text(evt.data);
+          commandVal.val("");
+        };
+
+				ws.onclose = function()
+				{
+					console.log("websocket connection closed");
+				};
+      })($);
+    </script>
+  </body>
+</html>
