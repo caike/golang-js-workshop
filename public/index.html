@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Dashboard</title>
+    <style>
+      #clients {
+        white-space: pre-wrap;
+      }
+      .truncate {
+        height: 100px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="content">
+      <ul id="clients">
+      <ul>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      (function($){
+        // Let us open a web socket
+        const url = window.location.href.replace(window.location.protocol, "");
+        const ws = new WebSocket("ws:" + url + "web");
+
+        ws.onopen = function()
+        {
+          console.log("connected to websocket");
+        };
+
+        ws.onmessage = function (event)
+        {
+          console.log("received data from server");
+          const deviceStatus = JSON.parse(event.data);
+          updateDashboard(deviceStatus);
+        };
+
+        ws.onclose = function()
+        {
+          console.log("Connection is closed...");
+        };
+
+        function updateDashboard(status){
+          const li = $("<li/>").html(`Device name: <strong>${status.DeviceName}</strong>
+              <p>${status.CommandOutput}</p>`);
+
+          $("#clients").empty().append(li);
+        }
+      })($);
+    </script>
+  </body>
+</html>
+
